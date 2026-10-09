@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="洁身自好 · 一个关于选择与后果的普法互动故事">
+<title>洁身自好 · 普法互动故事</title>
+<style>*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#05070f;color:#e8ecf5;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none}
+#app{position:relative;max-width:520px;height:100%;margin:0 auto;background:#0b1020;overflow:hidden;box-shadow:0 0 40px #000}
+.screen{position:absolute;inset:0;display:none;flex-direction:column}
+.screen.active{display:flex}
+.screen.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hidden{display:none!important}
+
+/* 首页 */
+#scr-title{justify-content:flex-end}
+.title-art{position:absolute;inset:0}
+.title-art svg{width:100%;height:100%;display:block}
+.title-box{position:relative;padding:28px 24px calc(28px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(5,7,15,.92) 22%,#05070f);text-align:center}
+.badge{display:inline-block;font-size:12px;letter-spacing:2px;padding:4px 10px;border:1px solid #e0b25c88;color:#e0b25c;border-radius:20px;margin-bottom:12px}
+h1{font-size:46px;letter-spacing:10px;font-weight:800;text-shadow:0 0 24px rgba(224,178,92,.35);margin-bottom:6px}
+.sub{color:#a8b1c7;margin-bottom:22px;letter-spacing:2px}
+.btn{display:block;width:100%;padding:14px 16px;border-radius:12px;font-size:16px;font-weight:600;color:#e8ecf5;transition:transform .1s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,#d9a441,#b97a1f);color:#1a1205;box-shadow:0 6px 20px rgba(217,164,65,.3)}
+.btn.ghost{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12)}
+.btn.danger{background:#7a2230}
+.row{display:flex;gap:10px;margin-top:10px}
+.row .btn{flex:1;font-size:14px}
+.disclaimer{margin-top:16px;font-size:11px;color:#6d7690;line-height:1.6}
+
+/* 状态栏 */
+#stats{display:flex;gap:4px;padding:calc(6px + env(safe-area-inset-top)) 8px 6px;background:#070b17;border-bottom:1px solid #1a2238;z-index:3}
+.stat{flex:1;min-width:0;text-align:center;font-size:10.5px;color:#9aa4bd;position:relative}
+.stat .lab{white-space:nowrap}
+.stat .val{font-size:12px;font-weight:700;color:#e8ecf5;margin:1px 0 2px;transition:color .3s}
+.stat .bar{height:4px;background:#1b2338;border-radius:2px;overflow:hidden}
+.stat .bar i{display:block;height:100%;border-radius:2px;transition:width .6s}
+.stat.flash-down .val{color:#ff6b6b}
+.stat.flash-up .val{color:#5fd38d}
+
+/* 场景 */
+#scene{position:relative;flex:1 1 auto;min-height:36%;overflow:hidden;background:#000}
+#bg{position:absolute;inset:0;transition:opacity .5s}
+#bg svg{width:100%;height:100%;display:block}
+#bg.fade{opacity:0}
+#chapter-card{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(3,5,12,.86);z-index:4;text-align:center;animation:fadein .6s}
+#chapter-card.show{display:flex}
+#chapter-card .no{font-size:13px;letter-spacing:6px;color:#e0b25c;margin-bottom:10px}
+#chapter-card .nm{font-size:30px;font-weight:800;letter-spacing:6px}
+#chapter-card .tip{margin-top:14px;font-size:12px;color:#8892aa}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+#toasts{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5;pointer-events:none}
+.toast{font-size:12px;padding:4px 10px;border-radius:14px;background:rgba(0,0,0,.65);animation:toast 2.4s forwards;font-weight:600}
+.toast.up{color:#5fd38d}.toast.down{color:#ff7b7b}
+@keyframes toast{0%{opacity:0;transform:translateX(20px)}10%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+#btn-menu{position:absolute;left:8px;top:calc(52px + env(safe-area-inset-top));width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.45);color:#cfd6e6;font-size:16px;z-index:6}
+
+/* 对话面板 */
+#panel{flex:0 0 auto;max-height:62%;overflow-y:auto;background:linear-gradient(#0e1428,#0a0f1f);border-top:1px solid #222c48;padding:12px 14px calc(14px + env(safe-area-inset-bottom));z-index:3}
+#dialog{position:relative;min-height:96px;cursor:pointer;user-select:none;-webkit-user-select:none}
+#speaker{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:8px;margin-bottom:8px;background:#26304d;color:#e0b25c}
+#speaker.narr{background:transparent;color:#7f89a3;padding-left:0}
+#speaker.inner{background:#2c2440;color:#c9a8ff}
+#text{font-size:16px;line-height:1.75;color:#e8ecf5;min-height:56px;white-space:pre-wrap}
+#text.inner{color:#d7c6f5;font-style:italic}
+#tap-hint{text-align:right;font-size:11px;color:#5f6984;margin-top:4px;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.3}}
+#extra:empty{display:none}
+#extra{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.choice{text-align:left;padding:13px 14px;border-radius:12px;background:#18213a;border:1px solid #2b3658;color:#e8ecf5;font-size:15px;line-height:1.5;animation:slidein .35s backwards}
+.choice:active{background:#243056}
+.choice:nth-child(2){animation-delay:.07s}.choice:nth-child(3){animation-delay:.14s}
+@keyframes slidein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.next-btn{align-self:flex-end;padding:10px 22px;border-radius:20px;background:#d9a441;color:#1a1205;font-weight:700;font-size:15px}
+
+/* 法律提示卡 */
+.lawcard{border-radius:12px;background:linear-gradient(135deg,#132a4a,#0f1d36);border:1px solid #2f5d99;padding:11px 13px;animation:slidein .4s}
+.lawcard .lh{font-size:12px;font-weight:700;color:#7fb4ff;letter-spacing:1px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.lawcard .lh::before{content:"⚖";font-size:14px}
+.lawcard.tip{background:linear-gradient(135deg,#183326,#10241a);border-color:#2f7a52}
+.lawcard.tip .lh{color:#6fdc9c}.lawcard.tip .lh::before{content:"💡"}
+.lawcard.health{background:linear-gradient(135deg,#3a1a24,#26121a);border-color:#8a3448}
+.lawcard.health .lh{color:#ff8fa6}.lawcard.health .lh::before{content:"✚"}
+.lawcard .lt{font-size:13.5px;line-height:1.7;color:#dbe3f2}
+.lawcard .ls{margin-top:6px;font-size:11px;color:#7d8aa8;word-break:break-all}
+.lawcard .ls a{color:#7d8aa8}
+
+/* 结局页 */
+.ending-wrap{padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+.end-hero{position:relative;height:240px;overflow:hidden}
+.end-hero svg{width:100%;height:100%;display:block}
+.end-hero .ov{position:absolute;inset:0;background:linear-gradient(transparent 30%,#0b1020);display:flex;flex-direction:column;justify-content:flex-end;padding:18px}
+.end-tag{font-size:12px;letter-spacing:3px;color:#e0b25c}
+.end-tag.bad{color:#ff7b7b}.end-tag.good{color:#6fdc9c}
+.end-title{font-size:30px;font-weight:800;letter-spacing:4px;margin-top:4px}
+.end-sec{margin:14px 16px 0;padding:14px;border-radius:14px;background:#111830;border:1px solid #1f2945}
+.end-sec h3{font-size:14px;color:#e0b25c;margin-bottom:8px;letter-spacing:1px}
+.end-sec p,.end-sec li{font-size:14px;line-height:1.75;color:#d3dbea}
+.end-sec ul{padding-left:18px}
+.final-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center}
+.final-stats div{background:#0b1020;border-radius:8px;padding:8px 2px;font-size:11px;color:#8a94ad}
+.final-stats b{display:block;font-size:15px;color:#e8ecf5;margin-top:2px}
+.report li{list-style:none;margin-left:-18px;padding:6px 0;border-bottom:1px dashed #263052}
+.report li:last-child{border:none}
+.report b{color:#fff}
+.end-btns{margin:16px;display:flex;flex-direction:column;gap:10px}
+
+/* 通用页面 */
+.page{padding:0 14px calc(24px + env(safe-area-inset-bottom))}
+.page-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top)) 0 12px;background:#0b1020}
+.page-head h2{font-size:19px}
+.back{background:none;color:#e0b25c;font-size:15px;padding:6px 4px}
+.gcard{display:flex;gap:12px;align-items:center;padding:12px;margin-bottom:10px;border-radius:12px;background:#111830;border:1px solid #1f2945}
+.gcard .gi{width:64px;height:64px;flex:none;border-radius:10px;overflow:hidden;background:#1a2340;display:flex;align-items:center;justify-content:center;font-size:26px;color:#3d4766}
+.gcard .gi svg{width:100%;height:100%}
+.gcard h4{font-size:15px;margin-bottom:3px}
+.gcard p{font-size:12px;color:#8a94ad;line-height:1.5}
+.gcard.locked h4{color:#56607c}
+.progress{font-size:13px;color:#8a94ad;margin-bottom:12px}
+.law-sec{margin-bottom:14px;padding:14px;border-radius:12px;background:#111830;border:1px solid #1f2945}
+.law-sec h3{font-size:15px;color:#7fb4ff;margin-bottom:8px}
+.law-sec p{font-size:13.5px;line-height:1.75;color:#d3dbea;margin-bottom:6px}
+.law-sec blockquote{border-left:3px solid #2f5d99;padding:6px 10px;margin:6px 0;background:#0c1428;font-size:13px;line-height:1.7;color:#c7d3ea}
+.law-sec .src{font-size:11px;color:#6d7a98;word-break:break-all;line-height:1.6}
+.law-sec .src a{color:#7d95c4}
+.law-note{font-size:12px;color:#6d7690;line-height:1.7;margin:6px 2px 16px}
+
+/* 弹窗 */
+#modal{position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:20;display:flex;align-items:center;justify-content:center;padding:24px}
+.modal-card{width:100%;max-width:340px;background:#121a33;border:1px solid #2b3658;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.modal-card h3{font-size:17px;text-align:center;margin-bottom:4px}
+.modal-card p{font-size:13px;color:#a8b1c7;text-align:center;line-height:1.6}
+
+/* svg动画 */
+.siren-r{animation:sirenR .8s infinite}.siren-b{animation:sirenB .8s infinite}
+@keyframes sirenR{0%,49%{opacity:1}50%,100%{opacity:.08}}
+@keyframes sirenB{0%,49%{opacity:.08}50%,100%{opacity:1}}
+.soft-r{animation:softR .8s infinite}.soft-b{animation:softB .8s infinite}
+@keyframes softR{0%,49%{opacity:.22}50%,100%{opacity:.02}}
+@keyframes softB{0%,49%{opacity:.02}50%,100%{opacity:.22}}
+.twinkle{animation:blink 3s infinite}
+.neon{animation:neon 2.2s infinite}
+@keyframes neon{0%,100%{opacity:1}45%{opacity:.85}50%{opacity:.3}55%{opacity:.9}}
+.rec{animation:blink 1s infinite}
+.glow{animation:glow 2s infinite alternate}
+@keyframes glow{from{opacity:.55}to{opacity:1}}
+@media (min-height:760px){#text{font-size:17px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 首页 -->
+  <section id="scr-title" class="screen active">
+    <div class="title-art" id="title-art"></div>
+    <div class="title-box">
+      <div class="badge">普法互动故事</div>
+      <h1>洁身自好</h1>
+      <p class="sub">一念之差，代价是一个家</p>
+      <button class="btn primary" id="btn-start">开始故事</button>
+      <div class="row">
+        <button class="btn ghost" id="btn-endings">结局收集 <span id="end-count">0/9</span></button>
+        <button class="btn ghost" id="btn-law">法律知识</button>
+      </div>
+      <p class="disclaimer">故事纯属虚构，人物均为原创。法律条文均标注出处，仅供普法参考，不构成法律意见。</p>
+    </div>
+  </section>
+
+  <!-- 游戏 -->
+  <section id="scr-game" class="screen">
+    <header id="stats"></header>
+    <div id="scene"><div id="bg"></div><div id="chapter-card"></div><div id="toasts"></div></div>
+    <div id="panel">
+      <div id="dialog">
+        <div id="speaker"></div>
+        <div id="text"></div>
+        <div id="tap-hint">轻触继续 ▾</div>
+      </div>
+      <div id="extra"></div>
+    </div>
+    <button id="btn-menu" aria-label="菜单">☰</button>
+  </section>
+
+  <!-- 结局 -->
+  <section id="scr-ending" class="screen scroll">
+    <div class="ending-wrap" id="ending-body"></div>
+  </section>
+
+  <!-- 结局收集 -->
+  <section id="scr-gallery" class="screen scroll">
+    <div class="page">
+      <div class="page-head"><button class="back" data-go="title">‹ 返回</button><h2>结局收集</h2></div>
+      <div id="gallery"></div>
+    </div>
+  </section>
+
+  <!-- 法律知识 -->
+  <section id="scr-law" class="screen scroll">
+    <div class="page">
+      <div class="page-head"><button class="back" data-go="back">‹ 返回</button><h2>法律知识</h2></div>
+      <div id="lawbook"></div>
+    </div>
+  </section>
+
+  <div id="modal" class="hidden"><div class="modal-card" id="modal-card"></div></div>
+</div>
+<script>/* 原创 SVG 场景插画（无真人形象） */
+const ART = (() => {
+  const W = 360, H = 300;
+  const wrap = (inner, defs = '') =>
+    `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${inner}</svg>`;
+  // 伪随机，保证每次画面一致
+  let seed = 7;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const sky = (id, a, b) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+
+  function skyline(y, color, winColor, count = 14, maxH = 120) {
+    seed = 11; let s = '', x = -10;
+    for (let i = 0; i < count; i++) {
+      const w = 22 + rnd() * 30, h = 40 + rnd() * maxH;
+      s += `<rect x="${x}" y="${y - h}" width="${w}" height="${h + 40}" fill="${color}"/>`;
+      for (let wy = y - h + 8; wy < y - 6; wy += 11)
+        for (let wx = x + 4; wx < x + w - 5; wx += 8)
+          if (rnd() > 0.62) s += `<rect x="${wx}" y="${wy}" width="4" height="5" fill="${winColor}" opacity="${0.5 + rnd() * 0.5}"/>`;
+      x += w + 2;
+    }
+    return s;
+  }
+  function stars(n = 30, maxY = 120) {
+    seed = 3; let s = '';
+    for (let i = 0; i < n; i++) s += `<circle class="${i % 3 ? '' : 'twinkle'}" cx="${rnd() * W}" cy="${rnd() * maxY}" r="${rnd() * 1.2 + .3}" fill="#fff" opacity="${.3 + rnd() * .6}"/>`;
+    return s;
+  }
+  // 简化的人物剪影（无面部特征）
+  function person(x, y, s = 1, c = '#1b2236', opts = {}) {
+    const head = `<circle cx="${x}" cy="${y - 62 * s}" r="${11 * s}" fill="${c}"/>`;
+    const body = `<path d="M${x - 17 * s} ${y} L${x - 15 * s} ${y - 38 * s} Q${x} ${y - 52 * s} ${x + 15 * s} ${y - 38 * s} L${x + 17 * s} ${y} Z" fill="${c}"/>`;
+    const cap = opts.cap ? `<rect x="${x - 12 * s}" y="${y - 78 * s}" width="${24 * s}" height="${7 * s}" rx="${2 * s}" fill="${opts.cap}"/><rect x="${x - 14 * s}" y="${y - 72 * s}" width="${28 * s}" height="${3 * s}" fill="${opts.cap}"/>` : '';
+    return head + body + cap;
+  }
+
+  const scenes = {
+    title() {
+      return wrap(`<rect width="360" height="300" fill="url(#g)"/>${stars(40, 140)}
+        <circle cx="290" cy="60" r="22" fill="#f3e3b5" opacity=".9"/><circle cx="282" cy="54" r="22" fill="#0d1430"/>
+        ${skyline(230, '#0a0f22', '#e0b25c', 16, 130)}
+        <rect y="228" width="360" height="72" fill="#05070f"/>
+        <g class="neon"><rect x="40" y="150" width="54" height="18" rx="3" fill="none" stroke="#ff4f8b" stroke-width="2"/></g>
+        <path d="M180 300 L180 236" stroke="#e0b25c" stroke-width="1" opacity=".4"/>
+        ${person(180, 262, 1.1, '#000')}
+        <ellipse cx="180" cy="262" rx="40" ry="5" fill="#000" opacity=".5"/>`,
+        sky('g', '#0d1430', '#2a1f3d'));
+    },
+    home() {
+      return wrap(`<rect width="360" height="300" fill="#3b2a1e"/>
+        <rect x="0" y="0" width="360" height="190" fill="#4a3526"/>
+        <rect x="230" y="30" width="100" height="90" fill="#1d2a4a" stroke="#6b4c33" stroke-width="6"/>${''}
+        <line x1="280" y1="30" x2="280" y2="120" stroke="#6b4c33" stroke-width="4"/>
+        <circle cx="300" cy="55" r="8" fill="#f3e3b5" opacity=".8"/>
+        <rect x="40" y="40" width="60" height="44" fill="#e9d9b6" stroke="#7a5a3c" stroke-width="4"/>
+        <path d="M50 76 L62 58 L72 70 L80 62 L92 76Z" fill="#7aa36b"/><circle cx="84" cy="52" r="5" fill="#f0a64a"/>
+        <line x1="180" y1="0" x2="180" y2="70" stroke="#2a1d14" stroke-width="2"/>
+        <path d="M150 70 L210 70 L195 95 L165 95Z" fill="#f2c46d"/>
+        <ellipse cx="180" cy="190" rx="150" ry="70" fill="#ffd27a" opacity=".18" class="glow"/>
+        <ellipse cx="180" cy="215" rx="130" ry="26" fill="#8a5a36"/><rect x="60" y="215" width="240" height="60" fill="#6e4528"/>
+        <ellipse cx="130" cy="208" rx="18" ry="6" fill="#f4f1ea"/><ellipse cx="180" cy="206" rx="22" ry="7" fill="#f4f1ea"/><ellipse cx="232" cy="208" rx="18" ry="6" fill="#f4f1ea"/>
+        <ellipse cx="180" cy="203" rx="14" ry="4" fill="#d8763a"/><ellipse cx="130" cy="206" rx="10" ry="3" fill="#7fb35e"/><ellipse cx="232" cy="206" rx="10" ry="3" fill="#e8d27a"/>
+        ${person(95, 210, .95, '#2a1d16')}${person(265, 210, .95, '#2a1d16')}${person(180, 195, .6, '#2a1d16')}`);
+    },
+    dinnerCold() {
+      return wrap(`<rect width="360" height="300" fill="#1a2233"/>
+        <rect x="230" y="30" width="100" height="90" fill="#0b1124" stroke="#2c3550" stroke-width="6"/>
+        <line x1="280" y1="30" x2="280" y2="120" stroke="#2c3550" stroke-width="4"/>
+        <line x1="180" y1="0" x2="180" y2="70" stroke="#111" stroke-width="2"/>
+        <path d="M150 70 L210 70 L195 95 L165 95Z" fill="#9aa6bf" opacity=".6"/>
+        <ellipse cx="180" cy="200" rx="140" ry="60" fill="#a8c4ff" opacity=".06"/>
+        <ellipse cx="180" cy="215" rx="130" ry="26" fill="#3a3f52"/><rect x="60" y="215" width="240" height="60" fill="#2b3042"/>
+        <ellipse cx="130" cy="208" rx="18" ry="6" fill="#c9cdd8"/><ellipse cx="180" cy="206" rx="22" ry="7" fill="#c9cdd8"/><ellipse cx="232" cy="208" rx="18" ry="6" fill="#c9cdd8"/>
+        <rect x="250" y="160" width="40" height="55" rx="4" fill="#232838"/>
+        ${person(95, 212, .95, '#0d111c')}
+        <rect x="110" y="120" width="140" height="40" rx="8" fill="#000" opacity="0"/>`);
+    },
+    cake() {
+      return wrap(`<rect width="360" height="300" fill="#1a2233"/>
+        <rect x="30" y="40" width="90" height="70" fill="#f1ead8" transform="rotate(-4 75 75)"/>
+        <path d="M48 92 Q60 70 72 92 Q84 70 96 92" stroke="#e86a7a" stroke-width="3" fill="none" transform="rotate(-4 75 75)"/>
+        <circle cx="60" cy="62" r="7" fill="#f6c44f" transform="rotate(-4 75 75)"/>
+        <ellipse cx="180" cy="222" rx="140" ry="28" fill="#3a3f52"/><rect x="40" y="222" width="280" height="60" fill="#2b3042"/>
+        <rect x="140" y="170" width="80" height="44" rx="6" fill="#efe3d0"/><rect x="140" y="170" width="80" height="12" rx="6" fill="#f2a7b5"/>
+        <line x1="170" y1="150" x2="170" y2="170" stroke="#f6e7a1" stroke-width="3"/><line x1="190" y1="150" x2="190" y2="170" stroke="#f6e7a1" stroke-width="3"/>
+        <text x="180" y="204" text-anchor="middle" font-size="13" fill="#b45a6a" font-weight="700">10</text>
+        <ellipse cx="180" cy="120" rx="120" ry="60" fill="#8fa8ff" opacity=".05"/>`);
+    },
+    hotel() {
+      return wrap(`<rect width="360" height="300" fill="#22263a"/>
+        <rect x="200" y="20" width="140" height="130" fill="url(#gs)"/>${''}
+        <g clip-path="url(#cw)">${skyline(150, '#0b1022', '#ffd27a', 10, 70).replace(/x="(-?[\d.]+)"/g, (m, v) => `x="${+v + 200}"`)}</g>
+        <rect x="200" y="20" width="140" height="130" fill="none" stroke="#3b4058" stroke-width="6"/>
+        <line x1="270" y1="20" x2="270" y2="150" stroke="#3b4058" stroke-width="4"/>
+        <rect x="185" y="14" width="18" height="150" fill="#5a3b4a"/>
+        <rect x="20" y="150" width="150" height="70" fill="#d8d3c8"/><rect x="20" y="140" width="150" height="20" rx="4" fill="#f0ece4"/>
+        <rect x="12" y="110" width="16" height="110" fill="#5b4636"/>
+        <rect x="200" y="175" width="120" height="10" fill="#5b4636"/><rect x="210" y="185" width="8" height="45" fill="#4a382b"/><rect x="302" y="185" width="8" height="45" fill="#4a382b"/>
+        <rect x="230" y="160" width="60" height="16" rx="2" fill="#2a2e3e"/><rect x="236" y="148" width="48" height="13" fill="#7fb4ff" opacity=".7" class="glow"/>
+        <path d="M300 130 L318 175 L282 175Z" fill="#f2c46d" opacity=".9"/>
+        <rect y="230" width="360" height="70" fill="#3a2f33"/>
+        <rect x="60" y="262" width="34" height="20" rx="2" fill="#f6efe1" transform="rotate(-12 77 272)"/>
+        <rect x="64" y="266" width="20" height="3" fill="#d24a6a" transform="rotate(-12 77 272)"/>
+        <rect x="0" y="230" width="6" height="70" fill="#000" opacity=".5"/>`,
+        sky('gs', '#0b1030', '#1f2550') + `<clipPath id="cw"><rect x="200" y="20" width="140" height="130"/></clipPath>`);
+    },
+    city() {
+      return wrap(`<rect width="360" height="300" fill="url(#g)"/>${stars(25, 90)}
+        ${skyline(200, '#0b1022', '#ffd27a', 16, 120)}
+        <rect y="198" width="360" height="102" fill="#0a0d18"/>
+        <rect y="240" width="360" height="4" fill="#e0b25c" opacity=".25"/>
+        <g class="neon"><rect x="34" y="168" width="70" height="20" rx="4" fill="#1a0b16" stroke="#ff4f8b" stroke-width="2"/><text x="69" y="183" text-anchor="middle" font-size="11" fill="#ff86b0">养生 · 足疗</text></g>
+        <rect x="250" y="160" width="80" height="22" rx="4" fill="#0c1a2a" stroke="#4fc3ff" stroke-width="2"/><text x="290" y="175" text-anchor="middle" font-size="11" fill="#9fdcff">24h 便利店</text>
+        <ellipse cx="180" cy="270" rx="200" ry="12" fill="#e0b25c" opacity=".06"/>`,
+        sky('g', '#0a0f26', '#2b1c3a'));
+    },
+    massage() {
+      return wrap(`<rect width="360" height="300" fill="#140b16"/>
+        <rect x="40" y="40" width="280" height="200" fill="#1f1220"/>
+        <g class="neon"><rect x="90" y="56" width="180" height="40" rx="6" fill="#2a0f22" stroke="#ff4f8b" stroke-width="3"/>
+        <text x="180" y="83" text-anchor="middle" font-size="20" fill="#ff8fb8" font-weight="700" letter-spacing="4">××养生会所</text></g>
+        <rect x="70" y="120" width="90" height="110" fill="#3a1f2c"/><rect x="200" y="120" width="90" height="110" fill="#3a1f2c"/>
+        ${[0,1,2,3,4,5,6,7].map(i => `<line x1="70" y1="${126 + i * 13}" x2="160" y2="${126 + i * 13}" stroke="#5a2f40" stroke-width="3"/><line x1="200" y1="${126 + i * 13}" x2="290" y2="${126 + i * 13}" stroke="#5a2f40" stroke-width="3"/>`).join('')}
+        <rect x="165" y="140" width="30" height="100" fill="#0b060b"/>
+        <rect y="240" width="360" height="60" fill="#0a070b"/>
+        <ellipse cx="180" cy="245" rx="150" ry="16" fill="#ff4f8b" opacity=".12" class="glow"/>
+        ${person(320, 290, 1, '#050306')}`);
+    },
+    room() { // 中性的会所走廊/隔间门
+      return wrap(`<rect width="360" height="300" fill="#1c1018"/>
+        <path d="M0 0 L120 70 L120 230 L0 300Z" fill="#2a1622"/><path d="M360 0 L240 70 L240 230 L360 300Z" fill="#2a1622"/>
+        <rect x="120" y="70" width="120" height="160" fill="#140a10"/>
+        <rect x="150" y="100" width="60" height="130" fill="#3a2030"/><circle cx="200" cy="168" r="3" fill="#d6a85a"/>
+        <path d="M30 60 L80 90 L80 250 L30 280Z" fill="#3a2030"/><path d="M330 60 L280 90 L280 250 L330 280Z" fill="#3a2030"/>
+        <rect x="160" y="80" width="40" height="8" rx="2" fill="#ff4f8b" opacity=".6" class="neon"/>
+        <path d="M120 230 L240 230 L360 300 L0 300Z" fill="#100810"/>`);
+    },
+    police() {
+      return wrap(`<rect width="360" height="300" fill="#070a14"/>
+        ${skyline(170, '#0b0f1e', '#556', 14, 90)}
+        <rect y="168" width="360" height="132" fill="#0b0d16"/>
+        <rect class="soft-r" width="360" height="300" fill="#ff2a3a"/>
+        <rect class="soft-b" width="360" height="300" fill="#2a6bff"/>
+        <g transform="translate(70 170)">
+          <path d="M10 70 L20 38 Q26 26 44 26 L150 26 Q168 26 176 38 L196 70 Z" fill="#e9edf5"/>
+          <rect x="0" y="66" width="210" height="34" rx="8" fill="#f4f6fa"/>
+          <rect x="0" y="78" width="210" height="10" fill="#1d4ed8"/>
+          <text x="105" y="87" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" letter-spacing="3">公 安  POLICE</text>
+          <path d="M34 66 L44 36 L96 36 L96 66Z" fill="#26324d"/><path d="M104 66 L104 36 L160 36 L178 66Z" fill="#26324d"/>
+          <rect x="80" y="14" width="50" height="12" rx="3" fill="#222"/>
+          <rect class="siren-r" x="82" y="15" width="22" height="10" rx="2" fill="#ff2a3a"/>
+          <rect class="siren-b" x="106" y="15" width="22" height="10" rx="2" fill="#2a6bff"/>
+          <circle cx="45" cy="100" r="16" fill="#111"/><circle cx="165" cy="100" r="16" fill="#111"/>
+          <circle cx="45" cy="100" r="7" fill="#777"/><circle cx="165" cy="100" r="7" fill="#777"/>
+        </g>
+        <ellipse class="soft-r" cx="140" cy="186" rx="80" ry="40" fill="#ff2a3a"/>
+        <ellipse class="soft-b" cx="210" cy="186" rx="80" ry="40" fill="#2a6bff"/>
+        ${person(310, 290, 1.05, '#0d1424', {cap: '#1d2c4d'})}${person(36, 290, 1.05, '#0d1424', {cap: '#1d2c4d'})}`);
+    },
+    interrogation() {
+      return wrap(`<rect width="360" height="300" fill="#1b2029"/>
+        <rect width="360" height="200" fill="#232a35"/>
+        ${[0,1,2,3,4,5].map(i => `<line x1="${i * 72}" y1="0" x2="${i * 72}" y2="200" stroke="#1d232d" stroke-width="2"/>`).join('')}
+        <rect x="300" y="18" width="34" height="18" rx="4" fill="#0e1117"/><circle cx="312" cy="27" r="5" fill="#334"/>
+        <circle class="rec" cx="328" cy="24" r="3" fill="#ff3344"/>
+        <text x="318" y="48" text-anchor="middle" font-size="8" fill="#ff6677" class="rec">● REC</text>
+        <line x1="180" y1="0" x2="180" y2="40" stroke="#111" stroke-width="2"/>
+        <path d="M150 40 L210 40 L222 62 L138 62Z" fill="#cfd6e0"/>
+        <path d="M138 62 L222 62 L300 230 L60 230Z" fill="#fffbe6" opacity=".07"/>
+        <rect x="70" y="170" width="220" height="14" fill="#5e6470"/><rect x="80" y="184" width="10" height="70" fill="#4a505b"/><rect x="270" y="184" width="10" height="70" fill="#4a505b"/>
+        <rect x="150" y="160" width="60" height="12" fill="#e9e4d6"/><rect x="155" y="162" width="40" height="2" fill="#999"/><rect x="155" y="166" width="30" height="2" fill="#999"/>
+        ${person(110, 170, 1, '#0e1218', {cap: '#1d2c4d'})}${person(250, 260, 1.2, '#0b0e14')}
+        <rect x="0" y="230" width="360" height="70" fill="#15191f"/>
+        <rect x="16" y="40" width="70" height="44" fill="#2c3440"/><text x="51" y="58" text-anchor="middle" font-size="8" fill="#9aa6b8">执法办案区</text><text x="51" y="72" text-anchor="middle" font-size="7" fill="#7a8698">全程录音录像</text>`);
+    },
+    detention() {
+      return wrap(`<rect width="360" height="300" fill="url(#g)"/>
+        <rect x="40" y="90" width="280" height="150" fill="#5b616c"/>
+        <rect x="40" y="80" width="280" height="14" fill="#6d737e"/>
+        <rect x="130" y="130" width="100" height="110" fill="#2e333b"/>
+        ${[0,1,2,3,4,5,6].map(i => `<rect x="${136 + i * 14}" y="130" width="4" height="110" fill="#8a919c"/>`).join('')}
+        <rect x="100" y="98" width="160" height="22" fill="#e9ecf1"/><text x="180" y="114" text-anchor="middle" font-size="12" fill="#333" font-weight="700" letter-spacing="3">××市拘留所</text>
+        <rect y="240" width="360" height="60" fill="#3a3d44"/>
+        ${person(250, 270, 1, '#1a1d23')}`,
+        sky('g', '#8a93a3', '#c3c8d0'));
+    },
+    phone() {
+      return wrap(`<rect width="360" height="300" fill="#05070d"/>
+        <rect x="0" y="210" width="360" height="90" fill="#0b0e18"/>
+        <path d="M20 210 L60 150 L300 150 L340 210Z" fill="#111827"/>
+        <ellipse cx="180" cy="160" rx="120" ry="110" fill="#5aa0ff" opacity=".10" class="glow"/>
+        <rect x="128" y="40" width="104" height="200" rx="14" fill="#111" stroke="#333" stroke-width="3"/>
+        <rect x="134" y="52" width="92" height="176" rx="6" fill="#0f1a2e"/>
+        <rect x="140" y="62" width="80" height="10" rx="3" fill="#1e2a44"/>
+        <rect x="140" y="80" width="80" height="58" rx="6" fill="#2a1430" stroke="#ff4f8b" stroke-width="1.5"/>
+        <text x="180" y="98" text-anchor="middle" font-size="8" fill="#ff9cc0">同城 · 上门服务</text>
+        <text x="180" y="112" text-anchor="middle" font-size="7" fill="#d9b8c8">认证会员 立即预约</text>
+        <rect x="156" y="120" width="48" height="12" rx="6" fill="#ff4f8b"/><text x="180" y="129" text-anchor="middle" font-size="7" fill="#fff">点击下载</text>
+        <rect x="140" y="146" width="56" height="16" rx="6" fill="#26324d"/><rect x="164" y="168" width="56" height="16" rx="6" fill="#2c6b4a"/><rect x="140" y="190" width="70" height="16" rx="6" fill="#26324d"/>
+        <text x="180" y="243" text-anchor="middle" font-size="7" fill="#556">00:47</text>`);
+    },
+    restaurant() {
+      return wrap(`<rect width="360" height="300" fill="#2b1a14"/>
+        <rect width="360" height="160" fill="#3d241a"/>
+        ${[0,1,2,3].map(i => `<circle cx="${60 + i * 80}" cy="40" r="16" fill="#c43a2a" opacity=".85"/><line x1="${60 + i * 80}" y1="0" x2="${60 + i * 80}" y2="24" stroke="#222"/>`).join('')}
+        <ellipse cx="180" cy="200" rx="160" ry="50" fill="#7a2a1e"/><ellipse cx="180" cy="196" rx="150" ry="44" fill="#f2ead8"/>
+        <ellipse cx="180" cy="190" rx="60" ry="16" fill="#e2d6be"/>
+        ${[[110,178],[150,170],[210,170],[250,180],[180,205]].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="18" ry="6" fill="#fff"/><ellipse cx="${x}" cy="${y - 2}" rx="11" ry="3" fill="#c96a3a"/>`).join('')}
+        ${[[130,150],[230,148],[200,160]].map(([x,y]) => `<rect x="${x}" y="${y}" width="9" height="30" rx="2" fill="#2f6b3a"/><rect x="${x + 2}" y="${y - 8}" width="5" height="9" fill="#2f6b3a"/>`).join('')}
+        ${person(60, 250, 1.1, '#1a0f0b')}${person(300, 250, 1.1, '#1a0f0b')}${person(180, 150, .8, '#1a0f0b')}`);
+    },
+    clinic() {
+      return wrap(`<rect width="360" height="300" fill="#dfe6ea"/>
+        <path d="M0 0 L120 80 L120 220 L0 300Z" fill="#c9d3d8"/><path d="M360 0 L240 80 L240 220 L360 300Z" fill="#c9d3d8"/>
+        <rect x="120" y="80" width="120" height="140" fill="#eef3f5"/>
+        <rect x="140" y="90" width="80" height="22" rx="3" fill="#2a7a5a"/><text x="180" y="105" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">自愿咨询检测 VCT</text>
+        <rect x="160" y="120" width="40" height="100" fill="#9fb3bd"/>
+        <path d="M30 70 L80 100 L80 250 L30 280Z" fill="#a9bcc5"/>
+        <rect x="270" y="150" width="16" height="16" fill="#d9363e"/><rect x="275" y="145" width="6" height="26" fill="#fff"/><rect x="265" y="155" width="26" height="6" fill="#fff"/>
+        <path d="M120 220 L240 220 L360 300 L0 300Z" fill="#b8c4ca"/>
+        ${person(70, 285, 1.1, '#3b4650')}`);
+    },
+    corridor() {
+      return wrap(`<rect width="360" height="300" fill="#2a2228"/>
+        <path d="M0 0 L140 90 L140 210 L0 300Z" fill="#3a2e35"/><path d="M360 0 L220 90 L220 210 L360 300Z" fill="#3a2e35"/>
+        <rect x="140" y="90" width="80" height="120" fill="#1c161a"/>
+        ${[0,1,2].map(i => `<path d="M${20 + i * 40} ${40 + i * 25} L${50 + i * 35} ${58 + i * 22} L${50 + i * 35} ${262 - i * 22} L${20 + i * 40} ${280 - i * 25}Z" fill="#5a3f3a"/>`).join('')}
+        ${[0,1,2].map(i => `<path d="M${340 - i * 40} ${40 + i * 25} L${310 - i * 35} ${58 + i * 22} L${310 - i * 35} ${262 - i * 22} L${340 - i * 40} ${280 - i * 25}Z" fill="#5a3f3a"/>`).join('')}
+        <path d="M140 210 L220 210 L360 300 L0 300Z" fill="#4a2a2e"/>
+        <path d="M170 210 L190 210 L240 300 L120 300Z" fill="#7a3a40" opacity=".6"/>
+        ${[0,1,2].map(i => `<circle cx="180" cy="${30 + i * 26}" r="${8 - i * 2}" fill="#ffd9a0" opacity=".7"/>`).join('')}`);
+    },
+    office() {
+      return wrap(`<rect width="360" height="300" fill="#cfd6df"/>
+        <rect x="20" y="20" width="320" height="120" fill="#9fb8d6"/>
+        ${skyline(140, '#7f97b5', '#dfe8f3', 14, 70).replace(/fill="#7f97b5"/g, 'fill="#8aa2bf"')}
+        ${[0,1,2,3].map(i => `<line x1="${20 + i * 107}" y1="20" x2="${20 + i * 107}" y2="140" stroke="#e6ebf1" stroke-width="5"/>`).join('')}
+        <rect x="0" y="140" width="360" height="160" fill="#e6e9ee"/>
+        <rect x="30" y="190" width="300" height="12" fill="#8a7a66"/>
+        ${[60,160,260].map(x => `<rect x="${x}" y="160" width="50" height="32" rx="2" fill="#2a2f3a"/><rect x="${x + 3}" y="163" width="44" height="24" fill="#5a86c4" opacity=".8"/>`).join('')}
+        <rect x="250" y="40" width="70" height="30" fill="#fff" opacity=".85"/><text x="285" y="59" text-anchor="middle" font-size="9" fill="#c33">Q3 业绩</text>
+        ${person(130, 290, 1.2, '#3a4250')}`);
+    },
+    sea() {
+      return wrap(`<rect width="360" height="300" fill="url(#g)"/>
+        <circle cx="180" cy="170" r="40" fill="#ffd27a"/>
+        <rect y="168" width="360" height="132" fill="#2f6fa8"/>
+        ${[0,1,2,3,4,5].map(i => `<rect x="${130 - i * 6}" y="${176 + i * 9}" width="${100 + i * 12}" height="3" rx="1.5" fill="#ffe3a1" opacity="${.8 - i * .12}"/>`).join('')}
+        <path d="M0 250 Q90 235 180 248 T360 245 L360 300 L0 300Z" fill="#e8d3a6"/>
+        ${person(150, 275, 1, '#1f2a3a')}${person(205, 275, 1, '#1f2a3a')}${person(178, 275, .6, '#1f2a3a')}
+        <path d="M60 60 q8 -6 16 0 q8 -6 16 0" stroke="#4a3a4a" stroke-width="2" fill="none"/><path d="M270 80 q6 -5 12 0 q6 -5 12 0" stroke="#4a3a4a" stroke-width="2" fill="none"/>`,
+        sky('g', '#ffb27a', '#ffe3c4'));
+    },
+    black() { return wrap(`<rect width="360" height="300" fill="#000"/>`); }
+  };
+  return { get: (name) => (scenes[name] || scenes.black)() };
+})();
+
+/* 已核实的法律与健康知识（2026-10-09 查证） */
+const SRC = {
+  zhfa: 'http://paper.people.com.cn/rmrb/pc/content/202602/27/content_30142457.html',
+  zhfa2: 'https://xxgk.yczf.gov.cn/xzf/ycgaj/fdzdgknr/fgwj_41994/202601/t20260105_2305142.shtml',
+  zhold: 'https://news.qq.com/rain/a/20250628A02ANO00',
+  syjy: 'http://www.npc.gov.cn/c2/c30834/201912/t20191231_304368.html',
+  xingfa: 'https://czt.ln.gov.cn/czt/attachDir/2026/05/2026050715041524122.pdf',
+  xing9: 'http://politics.people.com.cn/n/2015/0830/c1001-27531497.html',
+  cqcdc: 'https://www.cqcdc.org/index.php?a=shows&catid=2242&id=949',
+  ncaids: 'https://ncaids.chinacdc.cn/sjb/azbcs_11132/201811/t20181106_196947.htm',
+  who: 'https://www.who.int/zh/news-room/fact-sheets/detail/sexually-transmitted-infections-(stis)',
+  whpol: 'https://gaj.wuhan.gov.cn/jmzx/jfts/202507/t20250703_2604761.html',
+  bdpol: 'http://gaj.baoding.gov.cn/Detail.aspx?ID=14224',
+  scfz: 'https://www.scfzbs.com/sz/202605/83252419.html',
+  xrt: 'https://binzhou.iqilu.com/bzminsheng/2026/0709/5927600.shtml',
+  fz: 'https://news.cctv.com/2023/06/19/ARTIV9l5ZBhbaV5H7Cjh9Q2t230619.shtml',
+  w12377: 'https://www.12377.cn/'
+};
+const ZH = '《治安管理处罚法》（2025年修订，2026年1月1日起施行）';
+
+/* 游戏内的法律提示卡 */
+const LAW = {
+  zh78: { t: ZH + '第七十八条', x: '卖淫、嫖娼的，处十日以上十五日以下拘留，可以并处五千元以下罚款；情节较轻的，处五日以下拘留或者一千元以下罚款。在公共场所拉客招嫖的，处五日以下拘留或者一千元以下罚款。', s: SRC.zhfa },
+  zh79: { t: ZH + '第七十九条', x: '引诱、容留、介绍他人卖淫的，处十日以上十五日以下拘留，可以并处五千元以下罚款。——“帮忙安排”的人同样违法；构成犯罪的，依照《刑法》第三百五十九条追究。', s: SRC.zhfa },
+  zh87: { t: ZH + '第八十七条', x: '旅馆业、饮食服务业、文化娱乐业、出租汽车业等单位的人员，在公安机关查处卖淫、嫖娼活动时通风报信，或以其他方式提供条件的，处十日以上十五日以下拘留。', s: SRC.zhfa },
+  zh96: { t: ZH + '第九十六条', x: '对现场发现的违反治安管理行为人，人民警察经出示人民警察证，可以口头传唤，但应当在询问笔录中注明。无正当理由不接受传唤的，可以强制传唤。', s: SRC.zhfa },
+  zh97: { t: ZH + '第九十七条', x: '询问查证一般不超过8小时；可能适用行政拘留的，不超过24小时。在执法办案场所询问应当全程同步录音录像。公安机关应当及时将传唤的原因和处所通知被传唤人家属。', s: SRC.zhfa },
+  zh116: { t: ZH + '第一百一十六条', x: '决定给予行政拘留处罚的，应当及时通知被处罚人的家属。（第一百一十条：处罚前被限制人身自由的时间，一日折抵拘留一日。）', s: SRC.zhfa },
+  zh136: { t: ZH + '第一百三十六条', x: '违反治安管理的记录应当予以封存，不得向任何单位和个人提供或者公开，但有关国家机关为办案需要或者有关单位根据国家规定进行查询的除外。——封存不等于消失。', s: SRC.zhfa },
+  zh22: { t: ZH + '第二十二条', x: '一年以内曾受过治安管理处罚的，从重处罚。', s: SRC.zhfa },
+  zh21: { t: ZH + '第二十一条', x: '违反治安管理行为人自愿向公安机关如实陈述自己的违法行为，承认违法事实，愿意接受处罚的，可以依法从宽处理。', s: SRC.zhfa },
+  extort: { t: '敲诈勒索：《治安管理处罚法》第五十八条 / 《刑法》第二百七十四条', x: '敲诈勒索的，处五日以上十日以下拘留或者二千元以下罚款；数额较大或者多次敲诈勒索，构成犯罪的，处三年以下有期徒刑、拘役或者管制，并处或者单处罚金；数额巨大的，处三年以上十年以下有期徒刑。', s: SRC.xingfa },
+  xf236: { t: '《刑法》第二百三十六条', x: '奸淫不满十四周岁的幼女的，以强奸论，从重处罚。2015年《刑法修正案（九）》已取消“嫖宿幼女罪”，此类行为一律按强奸罪从重处罚。骗子常以“她未成年”恐吓受害人，遇到敲诈应报警，而非私了。', s: SRC.xing9 },
+  xf360: { t: '《刑法》第三百六十条 传播性病罪', x: '明知自己患有梅毒、淋病等严重性病卖淫、嫖娼的，处五年以下有期徒刑、拘役或者管制，并处罚金。', s: SRC.xingfa },
+  syjy: { t: '收容教育已于2019年废止', x: '全国人大常委会决定自2019年12月29日起废止收容教育制度。现在对嫖娼行为主要依据《治安管理处罚法》给予拘留、罚款。', s: SRC.syjy },
+  hiv: { k: 'health', t: '健康提示 · 疾控中心', x: 'HIV抗体检测窗口期一般为4～12周（抗原检测约2～3周，核酸检测约5～10天）。建议高危行为后第4周左右检测，阴性的在第8或第12周复查。各地疾控中心自愿咨询检测（VCT）门诊提供免费、保密的咨询和检测。', s: SRC.cqcdc },
+  sti: { k: 'health', t: '健康提示 · 世界卫生组织', x: '全世界每天有超过100万15～49岁的人感染可治愈的性传播感染，其中大多数没有症状。疱疹、淋病和梅毒等会增加感染艾滋病毒的风险；淋病和衣原体是女性盆腔炎和不孕的主要原因。', s: SRC.who },
+  scam: { k: 'tip', t: '警方提醒 · 色情引流诈骗', x: '“上门服务”广告→诱导下载陌生APP→以会员费、保证金、“刷单激活”要求小额充值并返利取信→再以“操作失误”“账户冻结”索要解冻金，直到你转不出钱。凡要求先充值、先垫资的，都是诈骗。', s: SRC.bdpol },
+  scam2: { k: 'tip', t: '被骗了怎么办', x: '第一时间保存聊天记录、转账凭证，拨打110或96110反诈专线报警。不要再向对方转任何一笔“解冻费”。', s: SRC.scfz },
+  xrt: { k: 'tip', t: '警方提醒 · “仙人跳”', x: '“仙人跳”多利用受害人猎艳心理及事发后的羞耻、畏惧情绪实施敲诈。规避陷阱最好的方式是洁身自好；一旦遭遇，切勿因“怕丢人”私下给钱了事，应第一时间报警。（2026年7月山东阳信警方案例）', s: SRC.xrt },
+  card: { k: 'tip', t: '小提示', x: '酒店门缝里的“小卡片”、深夜的陌生来电，背后往往是涉黄或诈骗。可以直接告诉前台，或拨打110反映。', s: '' },
+  turn: { k: 'tip', t: '悬崖勒马', x: '违法行为没有发生，就没有法律后果。可是“问问”“看看”，本身就是一步步走近的开始。', s: '' },
+  biz: { k: 'tip', t: '应酬的底线', x: '生意靠的是专业和信誉，不是“一起犯过错”。拒绝不体面的邀请，可以很客气，但要很坚定。', s: '' },
+  friend: { k: 'tip', t: '换个说法，仍是违法', x: '以“交友”为名、以“红包”“礼物”为价，本质上仍是嫖娼；这类邀约里还常常藏着“仙人跳”。', s: '' },
+  family: { k: 'tip', t: '压力的出口', x: '工作压力大时，运动、倾诉、睡个好觉、和家人一起做点小事，都是更好的出口。必要时，可以寻求心理咨询。', s: '' }
+};
+
+/* 「法律知识」页 */
+const LAWBOOK = [
+  { h: '一、嫖娼要承担什么法律责任？', p: [
+    '我国《治安管理处罚法》已于2025年6月27日修订通过，自2026年1月1日起施行。卖淫嫖娼的条款由旧法第六十六条调整为新法第七十八条，“情节较轻”的罚款上限由五百元提高到一千元。'],
+    q: ['第七十八条　卖淫、嫖娼的，处十日以上十五日以下拘留，可以并处五千元以下罚款；情节较轻的，处五日以下拘留或者一千元以下罚款。在公共场所拉客招嫖的，处五日以下拘留或者一千元以下罚款。',
+        '第七十九条　引诱、容留、介绍他人卖淫的，处十日以上十五日以下拘留，可以并处五千元以下罚款；情节较轻的，处五日以下拘留或者一千元以上二千元以下罚款。',
+        '第二十二条　……一年以内曾受过治安管理处罚的，从重处罚。'],
+    s: [SRC.zhfa, SRC.zhfa2, SRC.zhold] },
+  { h: '二、被查获后会经历什么？会通知家人吗？', p: [
+    '现场可以被口头传唤（第九十六条）；在执法办案场所询问要全程同步录音录像，询问查证一般不超过8小时，可能适用行政拘留的不超过24小时（第九十七条）。',
+    '会通知家属：第九十七条规定“公安机关应当及时将传唤的原因和处所通知被传唤人家属”；第一百一十六条规定“决定给予行政拘留处罚的，应当及时通知被处罚人的家属”。',
+    '单位呢？法律没有要求公安机关通知普通职工的工作单位，但十多天的拘留无法正常上班，很难瞒住；如果是公职人员，第一百三十四条规定需要给予政务处分的，应当及时通报监察机关等有关单位。'],
+    s: [SRC.zhfa] },
+  { h: '三、会留下记录吗？', p: [
+    '新法第一百三十六条规定：违反治安管理的记录应当予以封存，不得向任何单位和个人提供或者公开，但有关国家机关为办案需要或者有关单位根据国家规定进行查询的除外。',
+    '也就是说，记录被“封存”，但并没有被删除，依法查询时仍然可以查到。'],
+    s: [SRC.zhfa] },
+  { h: '四、收容教育还有吗？', p: [
+    '没有了。2019年12月28日，全国人大常委会通过决定，废止《关于严禁卖淫嫖娼的决定》第四条第二款、第四款以及据此实行的收容教育制度，自2019年12月29日起施行。'],
+    s: [SRC.syjy] },
+  { h: '五、什么情况下会构成犯罪？', p: [
+    '涉及不满十四周岁的幼女：2015年《刑法修正案（九）》取消了“嫖宿幼女罪”，此类行为适用《刑法》第二百三十六条——“奸淫不满十四周岁的幼女的，以强奸论，从重处罚”。',
+    '明知自己有严重性病：《刑法》第三百六十条——“明知自己患有梅毒、淋病等严重性病卖淫、嫖娼的，处五年以下有期徒刑、拘役或者管制，并处罚金。”',
+    '组织、强迫、引诱、容留、介绍他人卖淫，可能构成《刑法》第三百五十八条、第三百五十九条规定的犯罪。'],
+    s: [SRC.xingfa, SRC.xing9] },
+  { h: '六、健康风险', p: [
+    '世界卫生组织：全世界每天有超过100万15～49岁的人感染可治愈的性传播感染，大多数感染者没有症状；疱疹、淋病和梅毒等会增加感染艾滋病毒的风险。',
+    '疾控中心：HIV抗体检测窗口期一般4～12周；窗口期内检测不出抗体，但已有传染性。建议高危行为后第4周左右检测，阴性的在第8或第12周复查。',
+    '去哪里查：各地疾控中心自愿咨询检测（VCT）门诊提供免费、保密的咨询和检测；县级以上医院、妇幼保健机构也能检测（可能收费）。'],
+    s: [SRC.who, SRC.cqcdc, SRC.ncaids] },
+  { h: '七、常见骗局', p: [
+    '色情引流诈骗：以“同城上门服务”为诱饵，诱导下载陌生APP，以会员费、保证金、“刷单激活”为名先小额返利取信，再以“操作失误”“账户冻结”“解冻费”连环要钱。四川广安一男子4小时内被骗29万余元。',
+    '“仙人跳”：设局者冒充“亲属”“丈夫”闯入、拍摄，以“发给你家人和单位”“对方未成年”等恐吓勒索。2026年7月山东阳信警方破获一起此类案件，三名设局者被行政拘留。警方提醒：切勿因怕丢人私下给钱，应第一时间报警。'],
+    s: [SRC.bdpol, SRC.whpol, SRC.scfz, SRC.xrt] },
+  { h: '八、举报与求助渠道', p: [
+    '紧急情况、发现涉黄违法活动：拨打 110。',
+    '电信网络诈骗咨询、举报：96110 反诈预警劝阻专线；下载“国家反诈中心”APP 可一键举报涉诈线索、验证可疑账号。',
+    '网络涉黄等违法和不良信息：中央网信办违法和不良信息举报中心 www.12377.cn。',
+    '检测咨询：当地疾控中心艾滋病自愿咨询检测（VCT）门诊。'],
+    s: [SRC.fz, SRC.w12377, SRC.ncaids] }
+];
+
+/* 剧情数据：所有诱惑只作中性提及，剧情直接切到后果 */
+const SPEAKERS = {
+  n: '旁白', me: '陈志远', in: '陈志远（内心）', wife: '林悦', kid: '朵朵', zhou: '老周', he: '同事小何',
+  pol: '民警', doc: '医生', kf: '“客服”', x: '陌生来电', boss: '主管', m1: '陌生男子', desk: '前台'
+};
+const START_STATS = { trust: 80, money: 15000, rep: 80, health: 90, stress: 25 };
+
+const CHAPTERS = {
+  0: ['序章', '一盏灯'], 1: ['第一章', '出差夜'], 2: ['第二章', '深夜弹窗'],
+  3: ['第三章', '酒过三巡'], 4: ['第四章', '附近的人'], 5: ['第五章', '十年']
+};
+
+const NODES = {
+  /* ========== 序章 ========== */
+  p0: { ch: 0, bg: 'home', lines: [
+    ['n', '陈志远，34岁，一家建材公司的区域销售经理。妻子林悦是小学老师，女儿朵朵今年六岁。'],
+    ['n', '房贷、业绩、应酬……日子不算轻松。但每天回家，餐桌上总有一盏暖黄的灯。'],
+    ['wife', '明天又出差？少喝点酒，早点睡。'],
+    ['kid', '爸爸，回来给我带小熊饼干！'],
+    ['me', '好，三天就回来。'],
+    ['n', '接下来，你将替陈志远做出选择。每一个选择，都可能改变这个家。']
+  ], next: 'c1_0' },
+
+  /* ========== 第一章 出差夜 ========== */
+  c1_0: { ch: 1, bg: 'hotel', lines: [
+    ['n', '晚上十一点，邻市一家快捷酒店。陈志远刚改完明天的方案，门缝底下被塞进来一张小卡片。'],
+    ['n', '卡片上印着“足疗按摩 · 特殊服务 · 24小时”，下面是一串手机号。'],
+    ['n', '几乎同时，房间电话响了。'],
+    ['x', '先生，晚上一个人吗？需要服务吗？'],
+    ['in', '一个人在外地……没人会知道吧。']
+  ], choices: [
+    { t: '挂断电话，把卡片扔进垃圾桶，给林悦打个视频', to: 'c1_safe', fx: { trust: 5, stress: -5 } },
+    { t: '挂断电话，拿着卡片去前台反映', to: 'c1_report', fx: { rep: 3, stress: -5 } },
+    { t: '按卡片上的号码打过去，“就问问”', to: 'c1_call', fx: { stress: 8 } }
+  ] },
+  c1_safe: { bg: 'hotel', lines: [
+    ['n', '视频接通，朵朵举着刚画好的画凑到屏幕前：“这是爸爸，这是妈妈，这是我！”'],
+    ['wife', '早点睡，明天加油。'],
+    ['n', '关灯，一夜无梦。第二天的方案讲得很顺利。']
+  ], law: 'card', next: 'c2_0' },
+  c1_report: { bg: 'hotel', lines: [
+    ['desk', '谢谢您告诉我们，我们马上排查楼层，也会向派出所报告。'],
+    ['n', '回到房间，他给林悦发了条消息：“今天一切顺利，想你们。”'],
+    ['n', '第二天的方案讲得很顺利。']
+  ], law: 'zh87', next: 'c2_0' },
+  c1_call: { bg: 'city', lines: [
+    ['x', '“××养生会所”，离您酒店走路五分钟。来了就说是小刘介绍的。'],
+    ['n', '他在镜子前犹豫了一会儿，还是穿上了外套。'],
+    ['n', '霓虹灯牌就在街角，一闪一闪。']
+  ], choices: [
+    { t: '走到门口，想起女儿的小熊饼干，转身回酒店', to: 'c1_turn', fx: { stress: 5 }, flag: 'waver' },
+    { t: '推门走进会所', to: 'c1_in' }
+  ] },
+  c1_turn: { bg: 'city', lines: [
+    ['n', '他在霓虹灯下站了半分钟，转身走了。'],
+    ['n', '回到房间，他删掉了通话记录，心跳了很久。'],
+    ['in', '差一点。就差一点。']
+  ], law: 'turn', next: 'c2_0' },
+  c1_in: { bg: 'massage', lines: [
+    ['n', '前台没多问，收了他800元现金，领他上了二楼一个隔间。'],
+    ['n', '门刚关上不到两分钟——']
+  ], fx: { money: -800 }, next: 'c1_raid' },
+  c1_raid: { bg: 'police', caught: true, lines: [
+    ['pol', '警察！所有人原地不动！'],
+    ['n', '楼道里脚步声、喊声响成一片。这是市公安局当晚的集中扫黄行动。'],
+    ['n', '民警出示了人民警察证，对现场人员进行口头传唤。'],
+    ['me', '我……我就是来按摩的……'],
+    ['pol', '有没有违法，我们会调查清楚。请配合。']
+  ], fx: { rep: -20, stress: 30 }, law: 'zh96', next: 'c1_station' },
+  c1_station: { bg: 'interrogation', lines: [
+    ['n', '凌晨一点，派出所询问室。墙角的摄像头亮着红灯——询问全程同步录音录像。'],
+    ['pol', '姓名，身份证号，工作单位。'],
+    ['n', '前台的收款记录、他手机里的通话记录，一样样摆在面前。他在笔录上按下了手印。'],
+    ['pol', '按照规定，我们要通知你的家属，告知传唤的原因和地点。'],
+    ['me', '能不能……别告诉我老婆？'],
+    ['pol', '这是法律规定。']
+  ], fx: { stress: 20, trust: -20 }, law: 'zh97', next: 'c1_decision' },
+  c1_decision: { bg: 'detention', lines: [
+    ['n', '第二天，派出所向他宣告了治安管理处罚决定书：行政拘留十二日，并处罚款三千元。'],
+    ['n', '他被送进了拘留所。拘留所的家属通知，也按规定发了出去。']
+  ], fx: { money: -3000, rep: -15 }, law: 'zh78', next: 'c1_after' },
+  c1_after: { bg: 'dinnerCold', lines: [
+    ['n', '十二天后，来接他的是林悦。回家的路上，她一句话也没说。'],
+    ['n', '公司那边，他报的是“病假”。可连续缺勤、错过的招标，让主管起了疑心。区域经理的位置，换了人。'],
+    ['kid', '爸爸，你这次出差为什么去了那么久？'],
+    ['n', '林悦放下筷子，起身进了卧室。']
+  ], fx: { trust: -30, rep: -15, stress: 15 }, law: 'zh136', ending: 'E1' },
+
+  /* ========== 第二章 深夜弹窗 ========== */
+  c2_0: { ch: 2, bg: 'phone', lines: [
+    ['n', '出差回来一周，季度考核压得人喘不过气。凌晨十二点多，陈志远还在客厅刷手机。'],
+    ['n', '屏幕上弹出一条广告：“同城上门服务，认证会员即可预约。”'],
+    ['n', '紧接着，一个陌生账号加他好友：“哥，下载这个APP，做三单任务就能免费约。”']
+  ], choices: [
+    { t: '删除、拉黑，顺手举报这个账号', to: 'c2_safe', fx: { stress: -3 } },
+    { t: '好奇，点进去下载了APP', to: 'c2_app', fx: { stress: 8 } }
+  ] },
+  c2_safe: { bg: 'phone', lines: [
+    ['n', '他关掉手机，去卧室看了一眼熟睡的朵朵。'],
+    ['n', '几天后，本地警方通报了一个以“上门服务”为诱饵的诈骗团伙，受害者有人一夜被骗了二十多万。']
+  ], law: 'scam', next: 'c3_0' },
+  c2_app: { bg: 'phone', lines: [
+    ['kf', '先充200元认证会员，马上返您220元。'],
+    ['n', '他半信半疑地转了200元。一分钟后，账户里真的多了220元。'],
+    ['kf', '恭喜您激活！接下来做个“三连单”，充5000元，完成后本金全额返还加佣金，并为您安排上门。']
+  ], fx: { money: 20 }, choices: [
+    { t: '“先返钱再要钱”？不对劲。立刻停手，卸载APP', to: 'c2_stop', flag: 'waver' },
+    { t: '前面都返了，应该没问题。充5000元', to: 'c2_deep', fx: { money: -5000, stress: 10 } }
+  ] },
+  c2_stop: { bg: 'phone', lines: [
+    ['n', '他卸载了APP，拉黑了“客服”，后背一阵发凉。'],
+    ['in', '先给甜头，再要大钱……差点就掉进去了。']
+  ], law: 'scam', next: 'c3_0' },
+  c2_deep: { bg: 'phone', lines: [
+    ['kf', '系统检测到您操作失误，账户已冻结。需缴纳15000元解冻金，解冻后可一并提现。'],
+    ['n', '他的手开始发抖。银行卡里已经没有那么多钱了。'],
+    ['in', '已经投进去五千了……再充一次，就能全拿回来吧？']
+  ], choices: [
+    { t: '用信用卡套现，再充15000元，先把本金拿回来', to: 'c2_ruin', fx: { money: -15000, stress: 20 } },
+    { t: '停手！保存聊天记录，拨打110报警', to: 'c2_police', fx: { stress: 5 } }
+  ] },
+  c2_ruin: { bg: 'phone', lines: [
+    ['kf', '解冻成功！但您的账户信誉分不足，需完成“高阶任务”（充值20000元）才能提现……'],
+    ['n', '他又借了网贷。天亮时，APP打不开了，“客服”的头像变成了灰色。'],
+    ['n', '前前后后，40200元。一周后，信用卡和网贷的催收短信，林悦全都看到了。'],
+    ['wife', '你跟我说实话，这些钱到底去哪了？']
+  ], fx: { money: -20000, trust: -35, rep: -10, stress: 25 }, law: 'scam2', ending: 'E2' },
+  c2_police: { bg: 'interrogation', lines: [
+    ['n', '派出所里，民警帮他做了笔录，调取了转账记录。'],
+    ['pol', '“上门服务”是诱饵，“刷单激活”是套路。你及时报警是对的，我们会对涉案账户依法处理，但能追回多少，要看侦查进展。'],
+    ['pol', '记住，再有人让你交“解冻费”，一分都别转。'],
+    ['n', '回家后，他犹豫了很久，还是把事情告诉了林悦。她很久没说话。']
+  ], fx: { trust: -20, rep: -5, stress: 10 }, law: 'scam2', ending: 'E3' },
+
+  /* ========== 第三章 酒过三巡 ========== */
+  c3_0: { ch: 3, bg: 'restaurant', lines: [
+    ['n', '季度最大的客户老周终于松口签约。庆功饭局一直喝到半夜。'],
+    ['zhou', '走，带你去个地方放松放松，有“特殊服务”，我请客！'],
+    ['zhou', '明年这单能不能续，就看兄弟给不给面子了。'],
+    ['n', '同事小何在一旁看着他，没说话。']
+  ], choices: [
+    { t: '“周总，我酒量不行，先送您回酒店。”帮他叫代驾', to: 'c3_safe', fx: { stress: 5 } },
+    { t: '不好驳客户面子，跟着去了一家会所', to: 'c3_go', fx: { stress: 10 } }
+  ] },
+  c3_safe: { bg: 'office', lines: [
+    ['n', '老周有点扫兴，嘟囔了两句，还是上了代驾的车。'],
+    ['n', '一个月后，老周打来电话续约。'],
+    ['zhou', '你这人靠谱。说实话，生意交给不乱来的人，我放心。'],
+    ['he', '陈哥，那天晚上……我挺佩服你的。']
+  ], fx: { rep: 10, stress: -5 }, law: 'biz', next: 'c4_0' },
+  c3_go: { bg: 'room', lines: [
+    ['n', '包间里灯光昏暗，老周已经去前台“安排”了。'],
+    ['in', '现在走，还来得及。']
+  ], choices: [
+    { t: '借口家里有急事，给老周发了条消息，离开', to: 'c3_leave', fx: { rep: -3, stress: 5 }, flag: 'waver' },
+    { t: '留下', to: 'c3_stay' }
+  ] },
+  c3_leave: { bg: 'city', lines: [
+    ['n', '冷风一吹，酒醒了一半。他在路边站了很久，打车回了家。'],
+    ['n', '老周第二天打电话来，语气有点冷淡。但合同，还是续上了。']
+  ], law: 'zh79', next: 'c4_0' },
+  c3_stay: { bg: 'black', lines: [
+    ['n', '那一晚，他留了下来。'],
+    ['n', '没有民警，没有人发现。他以为，这件事就这么过去了。']
+  ], fx: { stress: 10 }, next: 'c3_weeks' },
+  c3_weeks: { bg: 'clinic', lines: [
+    ['n', '三周后，他发现身体有些异样。他开始失眠，在网上越搜越怕。'],
+    ['n', '他不敢去家门口的医院，开车去了邻区疾控中心的自愿咨询检测门诊。'],
+    ['doc', '这里的咨询和检测是免费、保密的。要提醒你：HIV抗体检测有窗口期，一般4到12周。今天先查，第8或第12周还要复查。'],
+    ['doc', '梅毒也一起查一下。']
+  ], fx: { stress: 30, health: -15 }, law: 'hiv', next: 'c3_result' },
+  c3_result: { bg: 'clinic', lines: [
+    ['n', '结果出来了：梅毒检测阳性，需要规范治疗；HIV暂时阴性，但还在窗口期，要等复查。'],
+    ['doc', '梅毒可以治愈，但要按疗程治。你的配偶也需要检测。'],
+    ['doc', '还有一点你要清楚：明知自己患有梅毒、淋病等严重性病还去卖淫嫖娼，是刑事犯罪。']
+  ], fx: { health: -20, stress: 15 }, law: 'xf360', next: 'c3_end' },
+  c3_end: { bg: 'dinnerCold', lines: [
+    ['n', '那天晚上，他在餐桌上说出了一切。'],
+    ['n', '等林悦检测结果的那七天，是这个家最长的一周。'],
+    ['n', '她的结果是阴性。第二天，她带着朵朵搬回了娘家。'],
+    ['n', '之后的两个月，他每天都在等HIV复查的结果。']
+  ], fx: { trust: -45, stress: 20 }, law: 'sti', ending: 'E4' },
+
+  /* ========== 第四章 附近的人 ========== */
+  c4_0: { ch: 4, bg: 'phone', lines: [
+    ['n', '暑假，林悦带朵朵回了老家。一个人在家的第三晚，社交软件上“附近的人”发来消息。'],
+    ['n', '聊了几天，对方说：“来××酒店坐坐吧，记得带个‘红包’，两千，你懂的。”']
+  ], choices: [
+    { t: '不回复，拉黑，卸载这个软件', to: 'c4_safe', fx: { stress: -3 } },
+    { t: '答应赴约', to: 'c4_go', fx: { stress: 10 } }
+  ] },
+  c4_safe: { bg: 'home', lines: [
+    ['n', '他给林悦打了个电话，听朵朵讲了半小时老家的小狗。'],
+    ['kid', '爸爸，你一个人在家要好好吃饭哦！']
+  ], fx: { trust: 5 }, law: 'friend', next: 'c5_0' },
+  c4_go: { bg: 'corridor', lines: [
+    ['n', '他揣着红包进了房间。刚坐下不到五分钟，门被猛地撞开。'],
+    ['n', '两个男人冲了进来，一个举着手机对着他拍。'],
+    ['m1', '你知道她多大吗？她还没成年！拿十万出来私了，不然视频发给你老婆和公司！'],
+    ['in', '完了……完了……']
+  ], fx: { money: -2000, stress: 30 }, law: 'xf236', choices: [
+    { t: '怕丢人，先转两万“私了”', to: 'c4_pay', fx: { money: -20000, stress: 10 } },
+    { t: '稳住对方，借口去取钱，找机会拨打110', to: 'c4_police', fx: { stress: 5 } }
+  ] },
+  c4_pay: { bg: 'phone', lines: [
+    ['n', '转完钱，对方删了一段视频给他看，说“两清了”。'],
+    ['n', '一周后，陌生号码又发来截图：“视频还有备份。再拿三万。”'],
+    ['n', '他借钱转了。第三次，他实在拿不出来了。'],
+    ['n', '截图被发进了公司的客户群。林悦是从同事的电话里知道的。']
+  ], fx: { money: -30000, trust: -40, rep: -40, stress: 20 }, law: 'xrt', ending: 'E5' },
+  c4_police: { bg: 'police', caught: true, lines: [
+    ['n', '民警很快赶到，三个人都被带回了派出所。'],
+    ['n', '经查，这是一个专门设局敲诈的团伙。那名女子已经成年，所谓“未成年”只是吓唬人的说辞。'],
+    ['pol', '敲诈勒索，数额较大的涉嫌犯罪，我们会依法处理他们。'],
+    ['pol', '至于你——带着“红包”来赴约，你自己的行为，我们同样要依法调查。'],
+    ['n', '他把来龙去脉如实讲了一遍。凌晨，他给林悦打了电话，从头说起。']
+  ], fx: { rep: -15, trust: -30, stress: 10 }, law: 'extort', next: 'c4_after' },
+  c4_after: { bg: 'dinnerCold', lines: [
+    ['n', '没有被骗走一分钱，可他失去的东西，比钱多得多。'],
+    ['wife', '你报警，我知道你还没坏到底。可是，我需要时间。']
+  ], law: 'zh21', ending: 'E6' },
+
+  /* ========== 第五章 十年 ========== */
+  c5_0: { ch: 5, bg: 'office', lines: [
+    ['n', '结婚十周年的前一周，公司裁员的传闻传得沸沸扬扬，陈志远连着几晚睡不好。'],
+    ['zhou', '上次你没去，这次别扫兴。城中村那边有个“工作室”，便宜，安全，警察从来不查。'],
+    ['n', '同一时间，林悦发来消息：“周六十周年，朵朵画了张贺卡，不许提前看哦。”']
+  ], choices: [
+    { t: '“老周，以后这种事别叫我了。”', to: 'c5_safe', fx: { stress: -5, trust: 5 } },
+    { t: '“就这一次，释放一下压力。”', to: 'c5_go', fx: { stress: 10 } }
+  ] },
+  c5_go: { bg: 'police', caught: true, lines: [
+    ['n', '城中村一间出租屋。他刚把钱放在桌上，楼下就闪起了红蓝警灯。'],
+    ['pol', '警察，开门！'],
+    ['n', '这个“工作室”，民警已经盯了半个月。“警察从来不查”，只是招揽生意的话术。']
+  ], fx: { money: -600, rep: -20, stress: 30 }, law: 'zh79', next: 'c5_station' },
+  c5_station: { bg: 'interrogation', lines: [
+    ['n', '又是一间亮着红灯的询问室。笔录、按手印、通知家属。'],
+    ['me', '这事……会不会影响我女儿以后？'],
+    ['pol', '违反治安管理的记录会依法封存，不会随便公开，但有关机关依法查询的除外。'],
+    ['pol', '真正被记下来的，是你家里人心里的这件事。'],
+    ['n', '处罚决定：行政拘留十日，并处罚款两千元。']
+  ], fx: { money: -2000, trust: -30, stress: 15 }, law: 'zh136', next: 'c5_home' },
+  c5_home: { bg: 'cake', lines: [
+    ['n', '结婚十周年那天，他在拘留所里度过。'],
+    ['n', '家里的蛋糕没有切。朵朵的贺卡放在桌上，上面歪歪扭扭写着：“爸爸妈妈永远在一起”。'],
+    ['n', '林悦在餐桌前坐了一整晚。']
+  ], fx: { trust: -30, rep: -10 }, law: 'zh78', ending: 'E7' },
+  c5_safe: { bg: 'sea', lines: [
+    ['n', '周六，一家三口去了海边。'],
+    ['n', '朵朵的贺卡上画着三个手拉手的小人，旁边写着：“爸爸妈妈永远在一起”。'],
+    ['wife', '这些年，辛苦你了。'],
+    ['in', '有些路，不走，就永远不用回头。']
+  ], fx: { trust: 10, stress: -20, health: 5 }, law: 'family', endingFn: (st) => st.flags.waver ? 'E9' : 'E8' }
+};
+
+const ENDINGS = {
+  E1: { title: '十二天', kind: 'bad', bg: 'detention', ch: '第一章',
+    story: '一次“就问问”，换来十二天拘留、三千元罚款，丢掉了升职机会，也丢掉了妻子的信任。',
+    lesson: ['嫖娼可处十日以上十五日以下拘留，可以并处五千元以下罚款（治安管理处罚法第七十八条）。', '传唤和拘留都会依法通知家属，想“瞒住”几乎不可能。', '违法记录会被封存，但不会消失。'] },
+  E2: { title: '人财两空', kind: 'bad', bg: 'phone', ch: '第二章',
+    story: '“上门服务”从来不存在。存在的只有一个接一个的“解冻费”，和压在全家身上的四万多元债务。',
+    lesson: ['“先返小钱、再要大钱”是诈骗的典型特征。', '凡是要求充值、垫资、缴“解冻费”的，一律是诈骗。', '已经被骗，立刻停止转账，拨打110或96110。'] },
+  E3: { title: '及时止损', kind: 'mid', bg: 'interrogation', ch: '第二章',
+    story: '他在第二笔转账前停了手、报了警。五千元也许追不回来，但他没有让窟窿变得更大。',
+    lesson: ['越早报警，损失越小。', '保存聊天记录和转账凭证。', '最好的止损，是一开始就不点开那条弹窗。'] },
+  E4: { title: '一夜的代价', kind: 'bad', bg: 'clinic', ch: '第三章',
+    story: '没有被警察抓到，并不代表没有代价。一次侥幸，换来疾病、检测、等待，和一个支离破碎的家。',
+    lesson: ['大多数性传播感染没有症状，梅毒等会增加感染艾滋病毒的风险。', 'HIV窗口期一般4～12周，疾控中心VCT门诊可免费保密检测。', '明知患有严重性病仍卖淫嫖娼，构成传播性病罪（刑法第三百六十条）。'] },
+  E5: { title: '无底洞', kind: 'bad', bg: 'phone', ch: '第四章',
+    story: '“私了”换不来安宁，只会让对方知道你好拿捏。五万元打了水漂，最怕的事还是发生了。',
+    lesson: ['遭遇“仙人跳”，切勿因怕丢人私下给钱，应第一时间报警。', '敲诈勒索数额较大的，涉嫌敲诈勒索罪（刑法第二百七十四条）。', '“对方未成年”常被用来恐吓。真涉及不满十四周岁幼女，一律按强奸罪从重处罚。'] },
+  E6: { title: '亡羊补牢', kind: 'mid', bg: 'police', ch: '第四章',
+    story: '他选择了报警，设局的人受到了查处。可他自己的行为同样要接受调查，信任也要用很久去修补。',
+    lesson: ['被敲诈时，报警永远比私了更好。', '自愿如实陈述、承认违法事实，可以依法从宽处理（治安管理处罚法第二十一条）。', '最好的保护，是根本不去赴这个约。'] },
+  E7: { title: '餐桌上的沉默', kind: 'bad', bg: 'cake', ch: '第五章',
+    story: '“警察从来不查”只是话术。十周年那天，蛋糕没有切，贺卡上那句“永远在一起”让人不忍再看。',
+    lesson: ['所谓“安全的地方”并不存在。', '引诱、容留、介绍他人卖淫同样违法（治安管理处罚法第七十九条）。', '压力需要出口，但不是这个。'] },
+  E8: { title: '清清白白', kind: 'good', bg: 'sea', ch: '真结局',
+    story: '五次诱惑，五次拒绝。他没有做什么了不起的事，只是守住了底线。家里那盏暖黄的灯，一直亮着。',
+    lesson: ['拒绝诱惑，不需要多大的勇气，只需要一开始就说“不”。', '把心里的压力说给家人听，比任何“放松”都管用。', '遇到涉黄涉诈信息，可以举报：110、96110、12377。'] },
+  E9: { title: '悬崖勒马', kind: 'good', bg: 'sea', ch: '结局',
+    story: '他曾经动摇过，也曾走到门口。好在每一次，他都在最后一刻回了头。',
+    lesson: ['回头永远不晚，但下一次未必还有机会回头。', '“问问”“看看”，往往就是滑下去的第一步。', '远离诱惑最简单的办法：不点开、不回复、不赴约。'] }
+};
+
+/* 游戏引擎 */
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const STAT_DEF = [
+    { k: 'trust', n: '家庭信任', c: '#f2a65a' },
+    { k: 'money', n: '钱包', c: '#e0c35c' },
+    { k: 'rep', n: '名誉', c: '#7fb4ff' },
+    { k: 'health', n: '健康', c: '#5fd38d' },
+    { k: 'stress', n: '心理压力', c: '#ff6b8b' }
+  ];
+  const KEY = 'jieshen_endings_v1';
+  let st = null, node = null, lineIdx = 0, typing = null, prevScreen = 'title';
+
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } },
+    add(id) { const a = store.get(); if (!a.includes(id)) a.push(id); try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {} }
+  };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const fmtMoney = (v) => (v < 0 ? '负债' + Math.abs(v).toLocaleString() : '¥' + v.toLocaleString());
+
+  function show(id) {
+    const cur = document.querySelector('.screen.active');
+    if (cur && cur.id !== 'scr-law') prevScreen = cur.id.replace('scr-', '');
+    document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === 'scr-' + id));
+    const el = $('#scr-' + id); if (el) el.scrollTop = 0;
+  }
+
+  /* ---------- 状态栏 ---------- */
+  function renderStats(changed = {}) {
+    $('#stats').innerHTML = STAT_DEF.map((d) => {
+      const v = st.stats[d.k];
+      const pct = d.k === 'money' ? Math.max(0, Math.min(100, v / 200)) : v;
+      const cls = changed[d.k] ? (((d.k === 'stress') ? changed[d.k] < 0 : changed[d.k] > 0) ? 'flash-up' : 'flash-down') : '';
+      return `<div class="stat ${cls}" data-k="${d.k}"><div class="lab">${d.n}</div><div class="val">${d.k === 'money' ? fmtMoney(v) : v}</div><div class="bar"><i style="width:${pct}%;background:${d.c}"></i></div></div>`;
+    }).join('');
+  }
+  function applyFx(fx) {
+    if (!fx) return;
+    const changed = {};
+    for (const k in fx) {
+      if (!(k in st.stats)) continue;
+      const before = st.stats[k];
+      st.stats[k] = k === 'money' ? before + fx[k] : Math.max(0, Math.min(100, before + fx[k]));
+      changed[k] = st.stats[k] - before;
+      if (changed[k]) toast(k, changed[k]);
+    }
+    renderStats(changed);
+  }
+  function toast(k, d) {
+    const def = STAT_DEF.find((x) => x.k === k);
+    const good = k === 'stress' ? d < 0 : d > 0;
+    const el = document.createElement('div');
+    el.className = 'toast ' + (good ? 'up' : 'down');
+    el.textContent = `${def.n} ${d > 0 ? '+' : '−'}${k === 'money' ? '¥' : ''}${Math.abs(d).toLocaleString()}`;
+    $('#toasts').appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  }
+
+  /* ---------- 剧情 ---------- */
+  function newGame() {
+    st = { stats: { ...START_STATS }, flags: {}, path: [] };
+    renderStats();
+    show('game');
+    go('p0');
+  }
+  function setBg(name) {
+    const bg = $('#bg');
+    if (bg.dataset.name === name) return;
+    bg.classList.add('fade');
+    setTimeout(() => { bg.innerHTML = ART.get(name); bg.dataset.name = name; bg.classList.remove('fade'); }, 180);
+  }
+  function go(id) {
+    node = NODES[id];
+    if (!node) { console.warn('missing node', id); return; }
+    st.path.push(id);
+    lineIdx = 0;
+    $('#extra').innerHTML = '';
+    setBg(node.bg);
+    applyFx(node.fx);
+    if (node.ch !== undefined) {
+      const [no, nm] = CHAPTERS[node.ch];
+      const cc = $('#chapter-card');
+      cc.innerHTML = `<div class="no">${no}</div><div class="nm">${nm}</div><div class="tip">轻触继续</div>`;
+      cc.classList.add('show');
+      $('#dialog').style.visibility = 'hidden';
+      const close = () => { cc.classList.remove('show'); cc.onclick = null; $('#dialog').style.visibility = ''; showLine(); };
+      cc.onclick = close;
+      clearTimeout(cc._t); cc._t = setTimeout(() => { if (cc.classList.contains('show')) close(); }, 1800);
+    } else showLine();
+  }
+  function showLine() {
+    const [sp, text] = node.lines[lineIdx];
+    const spEl = $('#speaker'), tEl = $('#text');
+    spEl.textContent = SPEAKERS[sp];
+    spEl.className = sp === 'n' ? 'narr' : sp === 'in' ? 'inner' : '';
+    tEl.className = sp === 'in' ? 'inner' : '';
+    clearInterval(typing);
+    let i = 0; tEl.textContent = '';
+    tEl.dataset.full = text;
+    typing = setInterval(() => {
+      i += 2; tEl.textContent = text.slice(0, i);
+      if (i >= text.length) { clearInterval(typing); typing = null; afterType(); }
+    }, 22);
+    $('#tap-hint').style.visibility = 'hidden';
+  }
+  function afterType() {
+    const last = lineIdx >= node.lines.length - 1;
+    $('#tap-hint').style.visibility = last ? 'hidden' : 'visible';
+    if (last) renderExtra();
+  }
+  function advance() {
+    if ($('#chapter-card').classList.contains('show')) return;
+    const tEl = $('#text');
+    if (typing) { clearInterval(typing); typing = null; tEl.textContent = tEl.dataset.full; afterType(); return; }
+    if (lineIdx < node.lines.length - 1) { lineIdx++; showLine(); }
+  }
+  function lawCard(key) {
+    const L = LAW[key]; if (!L) return '';
+    const kind = L.k || 'law';
+    const head = kind === 'law' ? '法律提示 · ' + L.t : L.t;
+    return `<div class="lawcard ${kind === 'law' ? '' : kind}"><div class="lh">${esc(head)}</div><div class="lt">${esc(L.x)}</div>${L.s ? `<div class="ls">来源：<a href="${L.s}" target="_blank" rel="noopener">${esc(L.s)}</a></div>` : ''}</div>`;
+  }
+  function renderExtra() {
+    const ex = $('#extra');
+    if (ex.dataset.node === st.path.length + '') return;
+    ex.dataset.node = st.path.length + '';
+    let h = node.law ? lawCard(node.law) : '';
+    if (node.choices) {
+      h += node.choices.map((c, i) => `<button class="choice" data-i="${i}">${esc(c.t)}</button>`).join('');
+    } else if (node.ending || node.endingFn) {
+      h += `<button class="next-btn" id="btn-next">查看结局 ›</button>`;
+    } else {
+      h += `<button class="next-btn" id="btn-next">继续 ›</button>`;
+    }
+    ex.innerHTML = h;
+    ex.querySelectorAll('.choice').forEach((b) => b.onclick = (e) => { e.stopPropagation(); choose(+b.dataset.i); });
+    const nb = $('#btn-next');
+    if (nb) nb.onclick = (e) => { e.stopPropagation(); next(); };
+    requestAnimationFrame(() => { const p = $('#panel'); p.scrollTop = p.scrollHeight; });
+  }
+  function choose(i) {
+    const c = node.choices[i];
+    if (c.flag) st.flags[c.flag] = true;
+    applyFx(c.fx);
+    go(c.to);
+  }
+  function next() {
+    if (node.ending || node.endingFn) return ending(node.ending || node.endingFn(st));
+    go(node.next);
+  }
+
+  /* ---------- 结局 ---------- */
+  const REPORT = `<ul class="report">
+    <li><b>110</b>　紧急求助、举报涉黄违法活动</li>
+    <li><b>96110</b>　反电信网络诈骗预警劝阻专线（咨询、举报）</li>
+    <li><b>国家反诈中心APP</b>　一键举报涉诈线索、验证可疑账号</li>
+    <li><b>www.12377.cn</b>　违法和不良信息举报中心（网络涉黄信息）</li>
+    <li><b>当地疾控中心VCT门诊</b>　免费、保密的艾滋病咨询检测</li></ul>`;
+  function ending(id) {
+    const E = ENDINGS[id];
+    store.add(id);
+    updateCount();
+    const s = st.stats;
+    const tag = E.kind === 'good' ? '好结局' : E.kind === 'mid' ? '普通结局' : '坏结局';
+    $('#ending-body').innerHTML = `
+      <div class="end-hero">${ART.get(E.bg)}<div class="ov"><div class="end-tag ${E.kind === 'good' ? 'good' : E.kind === 'bad' ? 'bad' : ''}">${E.ch} · ${tag} · ${id}</div><div class="end-title">${esc(E.title)}</div></div></div>
+      <div class="end-sec"><p>${esc(E.story)}</p></div>
+      <div class="end-sec"><h3>最终状态</h3><div class="final-stats">
+        <div>家庭信任<b>${s.trust}</b></div><div>钱包<b style="font-size:12px">${fmtMoney(s.money)}</b></div><div>名誉<b>${s.rep}</b></div><div>健康<b>${s.health}</b></div><div>心理压力<b>${s.stress}</b></div></div></div>
+      <div class="end-sec"><h3>⚠ 警示</h3><ul>${E.lesson.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></div>
+      <div class="end-sec"><h3>☎ 举报与求助渠道</h3>${REPORT}</div>
+      <div class="end-btns">
+        <button class="btn primary" id="btn-share">分享给朋友，一起洁身自好</button>
+        <div class="row" style="margin:0"><button class="btn ghost" id="btn-again">再玩一次</button><button class="btn ghost" id="btn-e-gallery">结局收集 ${store.get().length}/9</button></div>
+        <button class="btn ghost" id="btn-e-law">法律知识与出处</button>
+        <button class="btn ghost" id="btn-e-home">返回首页</button>
+      </div>`;
+    $('#btn-share').onclick = () => share(E);
+    $('#btn-again').onclick = newGame;
+    $('#btn-e-gallery').onclick = () => { renderGallery(); show('gallery'); };
+    $('#btn-e-law').onclick = () => { renderLaw(); show('law'); };
+    $('#btn-e-home').onclick = () => show('title');
+    show('ending');
+  }
+  async function share(E) {
+    const text = `我在普法互动故事《洁身自好》里打出了结局「${E.title}」。一念之差，代价是一个家。嫖娼最高可拘留15日、罚款5000元，还会通知家属。洁身自好，远离黄赌毒！`;
+    const url = /^https?:/.test(location.href) ? location.href : '';
+    try {
+      if (navigator.share) { await navigator.share({ title: '洁身自好 · 普法互动故事', text, ...(url ? { url } : {}) }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const full = text + (url ? ' ' + url : '');
+    let ok = false;
+    try { await navigator.clipboard.writeText(full); ok = true; } catch (e) {
+      const ta = document.createElement('textarea'); ta.value = full; document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch (e2) {} ta.remove();
+    }
+    modal(`<h3>${ok ? '已复制分享文案' : '分享文案'}</h3><p style="text-align:left;user-select:text;-webkit-user-select:text">${esc(full)}</p><button class="btn primary" data-close>好的</button>`);
+  }
+
+  /* ---------- 结局收集 / 法律知识 ---------- */
+  function updateCount() { $('#end-count').textContent = store.get().length + '/9'; }
+  function renderGallery() {
+    const got = store.get();
+    $('#gallery').innerHTML = `<div class="progress">已收集 ${got.length} / 9 个结局</div>` +
+      Object.entries(ENDINGS).map(([id, E]) => {
+        const has = got.includes(id);
+        return `<div class="gcard ${has ? '' : 'locked'}"><div class="gi">${has ? ART.get(E.bg) : '?'}</div><div><h4>${id} · ${has ? esc(E.title) : '？？？'}</h4><p>${has ? esc(E.story) : `${E.ch} · 尚未解锁`}</p></div></div>`;
+      }).join('');
+  }
+  function renderLaw() {
+    const link = (u) => `<a href="${u}" target="_blank" rel="noopener">${esc(u)}</a>`;
+    $('#lawbook').innerHTML = `<p class="law-note">以下内容于2026年10月查证，条文均摘自公开发布的法律文本及官方机构页面，每一节下方注明出处。仅供普法参考，具体案件以公安、司法机关依法认定为准。</p>` +
+      LAWBOOK.map((sec) => `<div class="law-sec"><h3>${esc(sec.h)}</h3>${sec.p.map((p) => `<p>${esc(p)}</p>`).join('')}${(sec.q || []).map((q) => `<blockquote>${esc(q)}</blockquote>`).join('')}<div class="src">来源：<br>${sec.s.map(link).join('<br>')}</div></div>`).join('');
+  }
+
+  /* ---------- 弹窗 / 菜单 ---------- */
+  function modal(html) {
+    $('#modal-card').innerHTML = html;
+    $('#modal').classList.remove('hidden');
+    $('#modal-card').querySelectorAll('[data-close]').forEach((b) => b.onclick = () => $('#modal').classList.add('hidden'));
+  }
+  function menu() {
+    modal(`<h3>菜单</h3><button class="btn ghost" data-close>继续故事</button><button class="btn ghost" id="m-law">法律知识</button><button class="btn ghost" id="m-restart">重新开始</button><button class="btn ghost" id="m-home">返回首页</button>`);
+    $('#m-law').onclick = () => { $('#modal').classList.add('hidden'); renderLaw(); show('law'); };
+    $('#m-restart').onclick = () => { $('#modal').classList.add('hidden'); newGame(); };
+    $('#m-home').onclick = () => { $('#modal').classList.add('hidden'); show('title'); };
+  }
+
+  /* ---------- 绑定 ---------- */
+  $('#title-art').innerHTML = ART.get('title');
+  updateCount();
+  $('#btn-start').onclick = newGame;
+  $('#btn-endings').onclick = () => { renderGallery(); show('gallery'); };
+  $('#btn-law').onclick = () => { renderLaw(); show('law'); };
+  $('#dialog').addEventListener('click', advance);
+  $('#scene').addEventListener('click', (e) => { if (e.target.closest('#chapter-card')) return; advance(); });
+  $('#btn-menu').onclick = (e) => { e.stopPropagation(); menu(); };
+  $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') $('#modal').classList.add('hidden'); });
+  document.querySelectorAll('.back').forEach((b) => b.onclick = () => {
+    const to = b.dataset.go === 'back' ? (prevScreen === 'law' ? 'title' : prevScreen) : b.dataset.go;
+    show(to);
+  });
+  document.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && $('#scr-game').classList.contains('active')) advance(); });
+  window.__game = { get state() { return st; }, get node() { return node; } };
+})();
+</script>
+</body>
+</html>
